@@ -1,0 +1,96 @@
+openapi: 3.1.0
+
+info:
+  title: Sepehr's Server
+  version: 3.1.0
+
+paths:
+
+  /todo/{key}:
+    get:
+      summary: Gets a specific value based on the passed key
+
+      parameters:
+        - name: key
+          description: The key of that value that is being searched for
+          in: path
+          required: true
+
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Sep
+
+        "404":
+          description: The value with the given key was not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: boris
+
+    post:
+      summary: Creates a new key/value object with the passed key and value
+
+      parameters:
+        - name: key
+          description: the key of the new object that is being created
+          in: path
+          required: true
+
+      requestBody:
+        description: contains the value of the new object that is being created
+        required: false
+        content:
+          text/plain:
+            schema:
+              type: string
+              example: boris
+
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Sep
+
+        "404":
+          description: empty key passed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: ""
+
+    delete:
+      summary: deletes an existing key/value object(s) that have matching keys to key value passed in the parameter
+
+      parameters:
+        - name: key
+          description:
+          in: path
+          required: true
+
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Sep
+
+        "404":
+          description: The value with the given key was not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: ""
+
