@@ -1,7 +1,6 @@
 package com.example.plugins
 
-
-import com.example.Database
+import com.example.EbeansDb
 import com.example.ToDo
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
@@ -14,38 +13,39 @@ import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.routing
 
+
+//handle the case where posting a todo throws a 500 if you post the same todo twice
+//remove the two databse calls in delete (turn it just into 1 call) --> still say if the key is not found
+
+
 fun Application.configureRouting() {
 
-    val database = Database()
+    val ebeansDb = EbeansDb()
 
     routing {
         get<ToDo> {
             val reqKey: String = it.key
-
-            if(database.hasKey(reqKey)){
-                val desiredValue = database.returnValueWithKey(reqKey)
+            val desiredValue = ebeansDb.returnValueWithKey(reqKey)
+            if (desiredValue != null) {
                 call.respondText { "The value for key $reqKey is: $desiredValue" }
-            }else{
+            } else {
                 call.respond(HttpStatusCode.NotFound, "Key not found")
             }
         }
 
         post<ToDo> {
-
             val currentKey: String = it.key
             val currentvalue: String = call.receiveText()
-            database.addToHash(currentKey, currentvalue)
+            ebeansDb.addToHash(currentKey, currentvalue)
             call.respondText("Success")
-
         }
 
         delete<ToDo> {
-
             val currentKey: String = it.key
-            if(database.hasKey(currentKey)){
-                database.removeFromHash(currentKey)
+            if (ebeansDb.hasKey(currentKey)) {
+                ebeansDb.removeFromHash(currentKey)
                 call.respondText("Success")
-            }else{
+            } else {
                 call.respond(HttpStatusCode.NotFound, "Key not found")
             }
         }

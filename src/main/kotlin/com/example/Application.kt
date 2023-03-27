@@ -1,7 +1,11 @@
 package com.example
 
-import entity.Employee
 import com.example.plugins.configureRouting
+import entity.DTodo
+import entity.query.QDTodo
+import io.ebean.DB
+import io.ebean.annotation.Platform
+import io.ebean.dbmigration.DbMigration
 import io.ktor.resources.Resource
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -11,18 +15,13 @@ import io.ktor.server.resources.Resources
 
 fun main() {
 
-    val employee_22 = Employee(22, "sepehr", "address")
-    employee_22.save()
-    val foundEmployee = Employee.Find.byId(22)
-    if (foundEmployee != null){
-        println("employee with ID ${foundEmployee.id} was found and their name is ${foundEmployee.firstName}}")
-    } else{
-        println("employee was not found")
-    }
+    DB.getDefault()
+    DbMigration.create().apply {
+        setPlatform(Platform.POSTGRES)
+    }.generateMigration()
 
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
         .start(wait = true)
-
 }
 
 fun Application.module() {
@@ -34,24 +33,52 @@ fun Application.module() {
 class ToDo(val key: String) {
 }
 
-class Database() {
+class HashDatabase() : Database {
     val myHashMap = mutableMapOf<String, String>()
 
-    fun addToHash(key: String, value: String) {
+    override fun addToHash(key: String, value: String) {
         myHashMap[key] = value
     }
 
-    fun removeFromHash(key: String) {
+    override fun removeFromHash(key: String) {
         myHashMap.remove(key, myHashMap[key])
     }
 
-    fun returnValueWithKey(key: String): String? {
+    override fun returnValueWithKey(key: String): String? {
         return myHashMap[key]
     }
 
-    fun hasKey(key: String): Boolean {
+    override fun hasKey(key: String): Boolean {
         return (myHashMap.containsKey(key))
     }
 }
 
+interface Database {
+    fun hasKey(key: String): Boolean
+    fun returnValueWithKey(key: String): String?
+    fun addToHash(key: String, value: String)
+    fun removeFromHash(key: String)
+}
+
+class EbeansDb() : Database {
+    override fun hasKey(key: String): Boolean {
+        val dToDo = QDTodo().id.iequalTo(key).findOne()
+        return dToDo != null
+    }
+
+    override fun returnValueWithKey(key: String): String? {
+        val dToDo = QDTodo().id.iequalTo(key).findOne()
+        return dToDo?.content
+    }
+
+    override fun addToHash(key: String, value: String) {
+        val dTodo = DTodo(id = key, content = value)
+        dTodo.save()
+    }
+
+    override fun removeFromHash(key: String) {
+        QDTodo().id.iequalTo(key).delete()
+    }
+
+}
 

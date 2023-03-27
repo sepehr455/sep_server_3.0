@@ -12,16 +12,12 @@ class Employee (
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
 
-    @Column(name = "first_name")
-    var firstName: String,
+    val firstName: String,
 
-    @Column(name = "last_name")
-    var lastName: String,
+    val lastName: String,
 
-    @Column(nullable = true)
-    var address: String? = null
+    val address: String? = null
 ) : Model() {
-
     companion object Find : Finder<Long, Employee>(Employee::class.java)
 }
 

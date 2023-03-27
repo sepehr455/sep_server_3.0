@@ -1,0 +1,9 @@
+datasource:
+  db:
+    username: postgres
+    password: 007-823
+    url: jdbc:postgresql://localhost:5432/postgres
+
+ebean:
+  migration:
+    run: true
